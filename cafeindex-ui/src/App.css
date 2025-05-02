@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+  /* Paleta “cafetero” */
+  --brown-dark:   #4b2e2e;
+  --brown-medium: #6f4e37;
+  --brown-light:  #d3b8ae;
+  --cream-bg:     #fdf6e3;
+}
+
+/* Reset básico */
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream-bg);
+  font-family: 'Poppins', sans-serif;
+}
+
+.App {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Encabezados */
+h1 {
+  color: var(--brown-dark);
+  font-weight: 600;
+}
+h2 {
+  color: var(--brown-medium);
+  font-weight: 400;
+}
+
+/* Lista de precios */
+.dashboard ul li {
+  color: var(--brown-dark);
+  line-height: 1.5;
+}
+
+/* Gráfico */
+.recharts-wrapper {
+  border: 1px solid var(--brown-light);
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* Spinner / Mensajes */
+.dashboard p {
+  color: var(--brown-dark);
+}
+
+/* Predicción */
+.dashboard .prediction {
+  color: var(--brown-medium);
+  margin-top: 1rem;
+}
+.dashboard {
+  text-align: center;
+}
+
+.dashboard ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem auto;
+  display: inline-block;
+  text-align: left;
+}
+
+.dashboard .chart-container {
+  width: 80%;
+  max-width: 700px;
+  /* quitamos height aquí: lo fija React */
+  margin: 1rem auto;
+}
+.dashboard-footer {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--brown-light);
+  background: var(--cream-bg);
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--brown-dark);
+}
+
+.dashboard-footer .logo {
+  height: 24px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.dashboard-footer .mvp {
+  font-weight: 600;
+}
+
+.dashboard-footer .tech {
+  display: flex;
+  align-items: center;
+}
