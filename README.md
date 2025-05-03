@@ -1,6 +1,6 @@
 # Cafu00e9Index AI: Price Indexing and Prediction
 
-Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing.
+Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization.
 
 ## Features
 
@@ -22,6 +22,11 @@ Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices
    - Optional integration with DeepSeek AI models
    - Provides natural language explanations of price predictions
 
+5. **Interactive Frontend**
+   - Modern React interface with pastel purple aesthetics
+   - Responsive design for various screen sizes
+   - Real-time price visualization and AI interaction
+
 ## Project Structure
 
 ```
@@ -34,6 +39,9 @@ u2502   u251cu2500u2500 preprocessor.py  # Data cleaning and feature engineering
 u2502   u2514u2500u2500 model_trainer.py # Model training and evaluation
 u251cu2500u2500 prediction_service/    # FastAPI prediction service
 u2502   u2514u2500u2500 app.py          # API endpoints for predictions
+u251cu2500u2500 frontend/             # React frontend application
+u2502   u251cu2500u2500 src/             # Source code for React components
+u2502   u2514u2500u2500 public/          # Static assets
 u251cu2500u2500 config.py             # Configuration settings
 u251cu2500u2500 utils.py              # Utility functions
 u251cu2500u2500 main.py               # Main script for running the pipeline
@@ -46,13 +54,14 @@ u2514u2500u2500 README.md             # Project documentation
 ## Prerequisites
 
 - Python 3.9 or higher
+- Node.js 14+ and npm/yarn (for frontend)
 - Docker and Docker Compose (for containerized deployment)
 - SubQuery node or access to a SubQuery GraphQL endpoint
-- OpenAI API key (optional, for explanation feature)
+- DeepSeek API key (optional, for explanation feature)
 
 ## Installation
 
-### Local Installation
+### Backend Installation
 
 1. Clone the repository:
    ```bash
@@ -73,7 +82,21 @@ u2514u2500u2500 README.md             # Project documentation
 
 4. Set up environment variables (optional):
    ```bash
-   export OPENAI_API_KEY=your_openai_api_key  # On Windows: set OPENAI_API_KEY=your_openai_api_key
+   export DEEPSEEK_API_KEY=your_deepseek_api_key  # On Windows: set DEEPSEEK_API_KEY=your_deepseek_api_key
+   ```
+
+### Frontend Installation
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or if you use yarn
+   yarn
    ```
 
 ### Docker Installation
@@ -99,7 +122,7 @@ You can skip specific steps with the following flags:
 python main.py --skip-index --skip-process --skip-train
 ```
 
-### Starting the Prediction API
+### Starting the Backend API
 
 To start the FastAPI prediction service:
 
@@ -111,6 +134,26 @@ Or with Docker:
 
 ```bash
 docker-compose up -d
+```
+
+### Running the Frontend
+
+In development mode:
+
+```bash
+cd frontend
+npm run dev
+# or with yarn
+yarn dev
+```
+
+For production build:
+
+```bash
+cd frontend
+npm run build
+# then serve the dist directory
+npm run preview
 ```
 
 ### API Endpoints
@@ -166,6 +209,23 @@ export DEEPSEEK_API_KEY=your_deepseek_api_key
 
 You can also change the DeepSeek model by updating the `DEEPSEEK_MODEL` variable in `config.py`.
 
+### Frontend Customization
+
+To modify the frontend appearance or behavior:
+
+1. Edit the React components in `frontend/src/`
+2. Adjust the Tailwind CSS styles in `frontend/src/index.css`
+3. For color schemes, modify the extended theme in `frontend/tailwind.config.js`
+
+## Connecting Frontend to Backend
+
+By default, the frontend will look for the backend API at `http://localhost:8000`. To change this:
+
+1. Create a `.env` file in the frontend directory:
+   ```
+   VITE_API_URL=http://your-api-url:port
+   ```
+
 ## Best Practices
 
 1. **Data Versioning**: The system saves raw and processed data in CSV files, enabling data versioning and reproducibility.
@@ -178,6 +238,28 @@ You can also change the DeepSeek model by updating the `DEEPSEEK_MODEL` variable
 
 5. **Configuration Management**: Central configuration in `config.py` makes the system easy to customize.
 
+## Deployment
+
+### Full-Stack Deployment with Docker
+
+The included Docker Compose setup will deploy both the backend and frontend services:
+
+```bash
+docker-compose up -d
+```
+
+This will:
+- Build and start the Python backend service on port 8000
+- Build and serve the frontend on port 3000
+- Set up appropriate networking between services
+
+### Separate Deployment
+
+For separate deployment:
+
+1. Backend: Deploy as a standard FastAPI application using Gunicorn/Uvicorn
+2. Frontend: Build using `npm run build` and serve the static files with Nginx or similar
+
 ## License
 
 [Your chosen license]
@@ -188,3 +270,6 @@ You can also change the DeepSeek model by updating the `DEEPSEEK_MODEL` variable
 - [FastAPI](https://fastapi.tiangolo.com/) for the high-performance API framework
 - [scikit-learn](https://scikit-learn.org/) for machine learning models
 - [DeepSeek](https://deepseek.com/) for AI models for natural language explanations
+- [React](https://reactjs.org/) for the frontend user interface
+- [Tailwind CSS](https://tailwindcss.com/) for styling and responsive design
+- [Vite](https://vitejs.dev/) for frontend tooling and development

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 font-sans;
+}
+
+/* Estilos personalizados adicionales */
+.card {
+  @apply bg-white rounded-lg shadow-lg p-6;
+}
+
+.btn-primary {
+  @apply bg-cafe-purple-600 hover:bg-cafe-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.input-field {
+  @apply border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-cafe-purple-400;
+}
