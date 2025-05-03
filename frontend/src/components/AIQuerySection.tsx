@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getPrediction, PredictionRequest, PredictionResponse, PriceData } from '../services/api';
+import PriceChart from './PriceChart';
 
 // Componente para la consulta IA
 const AIQuerySection: React.FC = () => {
@@ -131,12 +132,19 @@ const AIQuerySection: React.FC = () => {
       {/* Actualizar los componentes de tarjetas con datos reales */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
-          {/* Aquu00ed iru00eda un componente de gru00e1fico que use los datos de PredictionData */}
+          {/* Ahora usamos el componente PriceChart para mostrar el gru00e1fico */}
           <div className="card h-full">
             <h2 className="text-xl font-semibold text-cafe-purple-700 mb-4">Histu00f3rico de Precios</h2>
-            <div className="bg-cafe-purple-100 h-64 flex items-center justify-center rounded-lg">
-              <p className="text-cafe-purple-600 font-medium">[Gru00e1fico de lu00ednea aquu00ed]</p>
-            </div>
+            {predictionData ? (
+              <PriceChart 
+                historicalPrices={predictionData.historical_prices} 
+                predictions={predictionData.predictions} 
+              />
+            ) : (
+              <div className="bg-cafe-purple-100 h-64 flex items-center justify-center rounded-lg">
+                <p className="text-cafe-purple-600 font-medium">Consulta al agente para ver el gru00e1fico de precios</p>
+              </div>
+            )}
           </div>
         </div>
 
