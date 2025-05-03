@@ -32,6 +32,11 @@ Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices
    - Creates a public, auditable record of price history
    - Periodic submissions via scheduled jobs (every 15 minutes)
 
+7. **Wallet Integration**
+   - Connect Polkadot.js wallet directly from the frontend
+   - Select accounts and view balances
+   - Submit coffee price data on-chain with transaction signing
+
 ## Project Structure
 
 ```
@@ -50,6 +55,8 @@ u2502   u251cu2500u2500 run_oracle.py    # Script to run the oracle
 u2502   u2514u2500u2500 test_oracle.py   # Testing utility for the oracle
 u251cu2500u2500 frontend/             # React frontend application
 u2502   u251cu2500u2500 src/             # Source code for React components
+u2502   u2502   u251cu2500u2500 components/  # React components
+u2502   u2502   u2514u2500u2500 services/    # Service modules including Polkadot wallet integration
 u2502   u2514u2500u2500 public/          # Static assets
 u251cu2500u2500 config.py             # Configuration settings
 u251cu2500u2500 utils.py              # Utility functions
@@ -68,6 +75,7 @@ u2514u2500u2500 README.md             # Project documentation
 - SubQuery node or access to a SubQuery GraphQL endpoint
 - DeepSeek API key (optional, for explanation feature)
 - Westend account with funds (for the price oracle functionality)
+- Polkadot.js Browser Extension (for wallet integration)
 
 ## Installation
 
@@ -162,6 +170,19 @@ The price oracle functionality allows you to submit coffee price data to the Wes
    ```
    */15 * * * * cd /path/to/CAFE-INDEX && python main.py --oracle submit --hours 1
    ```
+
+### Using the Frontend Wallet Integration
+
+The frontend includes a wallet connection feature that allows users to interact directly with the Polkadot blockchain:
+
+1. Install the [Polkadot.js Extension](https://polkadot.js.org/extension/) in your browser
+2. Create or import an account in the extension
+3. Launch the frontend application
+4. Click "Connect Wallet" in the interface
+5. Select your account from the dropdown when prompted
+6. Use the "Send Price Test" button to submit a price to the blockchain
+
+**Note:** This feature requires the Polkadot.js Browser Extension to be installed and configured with at least one account.
 
 ### Starting the Backend API
 
@@ -260,6 +281,24 @@ To configure the Westend price oracle:
 
 3. **Custom ID Format**: Modify the oracle's ID generation in `price_oracle/run_oracle.py` if you want to use a different format.
 
+### Wallet Integration Customization
+
+The Polkadot.js wallet integration can be customized in several ways:
+
+1. **RPC Endpoint**: Change the Westend RPC endpoint in `src/services/polkadot.ts` to connect to a different network
+
+2. **Transaction Type**: Modify the `submitPrice` function in `src/services/polkadot.ts` to use a different transaction type
+
+3. **Data Format**: Adjust the price data format in the payload as needed for your specific use case
+
+4. **UI Customization**: The wallet connector component in `src/components/PolkadotConnector.tsx` can be styled and modified to match your requirements
+
+**Note about `priceFeed` Module**: The current implementation attempts to use a `priceFeed` module that may not be available on the standard Westend testnet. For a production environment, you would need to:
+
+1. Deploy a custom Substrate chain with the appropriate pallets
+2. Use a parachain with support for the required functionality
+3. Implement an alternative approach using contract calls or `system.remark`
+
 ### Frontend Customization
 
 To modify the frontend appearance or behavior:
@@ -288,6 +327,8 @@ By default, the frontend will look for the backend API at `http://localhost:8000
 4. **Logging**: Detailed logging provides insights into the system's operation and facilitates debugging.
 
 5. **Configuration Management**: Central configuration in `config.py` makes the system easy to customize.
+
+6. **Wallet Security**: The wallet integration uses the Polkadot.js extension for secure key management, never exposing private keys.
 
 ## Deployment
 
@@ -325,3 +366,4 @@ For separate deployment:
 - [Tailwind CSS](https://tailwindcss.com/) for styling and responsive design
 - [Vite](https://vitejs.dev/) for frontend tooling and development
 - [Polkadot/Substrate](https://polkadot.network/) for the blockchain infrastructure
+- [Polkadot.js](https://polkadot.js.org/) for browser extension and API tools
