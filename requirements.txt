@@ -1,19 +1,14 @@
-# Core libraries
+# Dependencias de Python
 pandas==2.0.1
 numpy==1.24.3
 joblib==1.2.0
-
-# Machine Learning
 scikit-learn==1.2.2
-
-# API and Services
 fastapi==0.95.2
 uvicorn==0.22.0
 pydantic==1.10.8
-
-# HTTP and GraphQL
 requests==2.29.0
 gql==3.4.0
-
-# Utilities
 python-dotenv==1.0.0
+
+# Dependencias para el Oracle de Polkadot
+substrate-interface==1.4.0

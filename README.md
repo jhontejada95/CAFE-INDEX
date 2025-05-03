@@ -1,6 +1,6 @@
 # Cafu00e9Index AI: Price Indexing and Prediction
 
-Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization.
+Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization, and Polkadot/Substrate for on-chain price oracle functionality.
 
 ## Features
 
@@ -27,6 +27,11 @@ Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices
    - Responsive design for various screen sizes
    - Real-time price visualization and AI interaction
 
+6. **On-chain Price Oracle**
+   - Publishes coffee price data to Polkadot's Westend testnet
+   - Creates a public, auditable record of price history
+   - Periodic submissions via scheduled jobs (every 15 minutes)
+
 ## Project Structure
 
 ```
@@ -39,6 +44,10 @@ u2502   u251cu2500u2500 preprocessor.py  # Data cleaning and feature engineering
 u2502   u2514u2500u2500 model_trainer.py # Model training and evaluation
 u251cu2500u2500 prediction_service/    # FastAPI prediction service
 u2502   u2514u2500u2500 app.py          # API endpoints for predictions
+u251cu2500u2500 price_oracle/          # Polkadot price oracle functionality
+u2502   u251cu2500u2500 oracle.py        # Core oracle implementation
+u2502   u251cu2500u2500 run_oracle.py    # Script to run the oracle
+u2502   u2514u2500u2500 test_oracle.py   # Testing utility for the oracle
 u251cu2500u2500 frontend/             # React frontend application
 u2502   u251cu2500u2500 src/             # Source code for React components
 u2502   u2514u2500u2500 public/          # Static assets
@@ -58,6 +67,7 @@ u2514u2500u2500 README.md             # Project documentation
 - Docker and Docker Compose (for containerized deployment)
 - SubQuery node or access to a SubQuery GraphQL endpoint
 - DeepSeek API key (optional, for explanation feature)
+- Westend account with funds (for the price oracle functionality)
 
 ## Installation
 
@@ -80,9 +90,10 @@ u2514u2500u2500 README.md             # Project documentation
    pip install -r requirements.txt
    ```
 
-4. Set up environment variables (optional):
+4. Set up environment variables:
    ```bash
-   export DEEPSEEK_API_KEY=your_deepseek_api_key  # On Windows: set DEEPSEEK_API_KEY=your_deepseek_api_key
+   cp .env.example .env
+   # Edit .env file with your API keys and settings
    ```
 
 ### Frontend Installation
@@ -121,6 +132,36 @@ You can skip specific steps with the following flags:
 ```bash
 python main.py --skip-index --skip-process --skip-train
 ```
+
+### Using the Price Oracle
+
+The price oracle functionality allows you to submit coffee price data to the Westend testnet:
+
+1. Set up your Westend account in `.env` file:
+   ```
+   WESTEND_WS_URL=wss://westend-rpc.polkadot.io
+   SIGNER_SEED=your 12-word mnemonic seed phrase
+   ```
+
+2. Test the connection to Westend:
+   ```bash
+   python main.py --oracle test-connection
+   ```
+
+3. Send a test price submission:
+   ```bash
+   python main.py --oracle test-send
+   ```
+
+4. Submit recent prices to Westend:
+   ```bash
+   python main.py --oracle submit --hours 24
+   ```
+
+5. Set up a cron job to run every 15 minutes:
+   ```
+   */15 * * * * cd /path/to/CAFE-INDEX && python main.py --oracle submit --hours 1
+   ```
 
 ### Starting the Backend API
 
@@ -209,6 +250,16 @@ export DEEPSEEK_API_KEY=your_deepseek_api_key
 
 You can also change the DeepSeek model by updating the `DEEPSEEK_MODEL` variable in `config.py`.
 
+### Oracle Configuration
+
+To configure the Westend price oracle:
+
+1. **Connection**: You can use a custom Westend RPC endpoint by updating the `WESTEND_WS_URL` variable in `.env`
+   
+2. **Account**: Replace the `SIGNER_SEED` in `.env` with your own Westend account's mnemonic seed phrase. Ensure this account has sufficient funds for transaction fees.
+
+3. **Custom ID Format**: Modify the oracle's ID generation in `price_oracle/run_oracle.py` if you want to use a different format.
+
 ### Frontend Customization
 
 To modify the frontend appearance or behavior:
@@ -273,3 +324,4 @@ For separate deployment:
 - [React](https://reactjs.org/) for the frontend user interface
 - [Tailwind CSS](https://tailwindcss.com/) for styling and responsive design
 - [Vite](https://vitejs.dev/) for frontend tooling and development
+- [Polkadot/Substrate](https://polkadot.network/) for the blockchain infrastructure

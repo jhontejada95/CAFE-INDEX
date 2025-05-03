@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getPrediction, PredictionRequest, PredictionResponse, PriceData } from '../services/api';
 import PriceChart from './PriceChart';
+import PolkadotConnector from './PolkadotConnector';
+import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
 // Componente para la consulta IA
 const AIQuerySection: React.FC = () => {
@@ -8,6 +10,7 @@ const AIQuerySection: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [predictionData, setPredictionData] = useState<PredictionResponse | null>(null);
+  const [connectedAccount, setConnectedAccount] = useState<InjectedAccountWithMeta | null>(null);
 
   // Manejar el envu00edo de la consulta
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,6 +74,12 @@ const AIQuerySection: React.FC = () => {
       console.log('Explicaciu00f3n:', predictionData.explanation || 'No disponible');
     }
   }, [predictionData]);
+
+  // Manejar cambio de cuenta conectada
+  const handleAccountChange = (account: InjectedAccountWithMeta | null) => {
+    setConnectedAccount(account);
+    console.log('Cuenta conectada:', account ? account.address : 'Ninguna');
+  };
 
   return (
     <div>
@@ -167,16 +176,8 @@ const AIQuerySection: React.FC = () => {
             <p className="text-3xl font-bold text-cafe-purple-600 mt-2">{getMonthPrediction()} / lb</p>
           </div>
 
-          {/* Active Validators Card */}
-          <div className="card">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-700">Validadores Activos</h2>
-              <span className="text-2xl">ud83dudd27</span>
-            </div>
-            <p className="text-3xl font-bold text-cafe-purple-600 mt-2">
-              {predictionData ? '297' : 'N/A'}
-            </p>
-          </div>
+          {/* Polkadot Wallet Connector - Nuevo componente */}
+          <PolkadotConnector onAccountChange={handleAccountChange} />
         </div>
       </div>
     </div>
