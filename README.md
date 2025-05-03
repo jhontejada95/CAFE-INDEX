@@ -1,43 +1,43 @@
-# Cafu00e9Index AI: Price Indexing and Prediction
+# u2615 Cafu00e9Index AI: Price Indexing and Prediction ud83dudcc8
 
 Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization, and Polkadot/Substrate for on-chain price oracle functionality.
 
-## Features
+## u2728 Features
 
-1. **On-chain Price Indexing**
+1. **ud83dudcca On-chain Price Indexing**
    - Interacts with SubQuery's GraphQL API to fetch coffee price data
    - Stores data in CSV and/or SQLite database for analysis
 
-2. **Data Preprocessing & Modeling**
+2. **ud83euddd0 Data Preprocessing & Modeling**
    - Cleans and normalizes historical price data using pandas
    - Creates time-series features for prediction
    - Trains and evaluates RandomForest and Linear Regression models
    - Selects and saves the best-performing model
 
-3. **Prediction Service**
+3. **ud83dudd2e Prediction Service**
    - FastAPI endpoint that provides price predictions
    - Supports custom prediction horizons
 
-4. **AI-Enhanced Explanations**
+4. **ud83eudd16 AI-Enhanced Explanations**
    - Optional integration with DeepSeek AI models
    - Provides natural language explanations of price predictions
 
-5. **Interactive Frontend**
+5. **ud83dudcc8 Interactive Frontend**
    - Modern React interface with pastel purple aesthetics
    - Responsive design for various screen sizes
    - Real-time price visualization and AI interaction
 
-6. **On-chain Price Oracle**
+6. **ud83cudfdd On-chain Price Oracle**
    - Publishes coffee price data to Polkadot's Westend testnet
    - Creates a public, auditable record of price history
    - Periodic submissions via scheduled jobs (every 15 minutes)
 
-7. **Wallet Integration**
+7. **ud83dudd11 Wallet Integration**
    - Connect Polkadot.js wallet directly from the frontend
    - Select accounts and view balances
    - Submit coffee price data on-chain with transaction signing
 
-## Project Structure
+## ud83dudcbc Project Structure
 
 ```
 CAFE-INDEX/
@@ -67,7 +67,7 @@ u251cu2500u2500 docker-compose.yml     # Docker Compose configuration
 u2514u2500u2500 README.md             # Project documentation
 ```
 
-## Prerequisites
+## ud83dudcdd Prerequisites
 
 - Python 3.9 or higher
 - Node.js 14+ and npm/yarn (for frontend)
@@ -77,7 +77,7 @@ u2514u2500u2500 README.md             # Project documentation
 - Westend account with funds (for the price oracle functionality)
 - Polkadot.js Browser Extension (for wallet integration)
 
-## Installation
+## ud83dudd29 Installation
 
 ### Backend Installation
 
@@ -125,7 +125,7 @@ u2514u2500u2500 README.md             # Project documentation
    docker-compose up -d
    ```
 
-## Usage
+## ud83dude80 Usage
 
 ### Running the Indexing Pipeline
 
@@ -141,7 +141,7 @@ You can skip specific steps with the following flags:
 python main.py --skip-index --skip-process --skip-train
 ```
 
-### Using the Price Oracle
+### ud83dudc36 Using the Price Oracle
 
 The price oracle functionality allows you to submit coffee price data to the Westend testnet:
 
@@ -171,7 +171,7 @@ The price oracle functionality allows you to submit coffee price data to the Wes
    */15 * * * * cd /path/to/CAFE-INDEX && python main.py --oracle submit --hours 1
    ```
 
-### Using the Frontend Wallet Integration
+### ud83dudd10 Using the Frontend Wallet Integration
 
 The frontend includes a wallet connection feature that allows users to interact directly with the Polkadot blockchain:
 
@@ -184,7 +184,7 @@ The frontend includes a wallet connection feature that allows users to interact 
 
 **Note:** This feature requires the Polkadot.js Browser Extension to be installed and configured with at least one account.
 
-### Starting the Backend API
+### ud83dudc80 Starting the Backend API
 
 To start the FastAPI prediction service:
 
@@ -198,7 +198,7 @@ Or with Docker:
 docker-compose up -d
 ```
 
-### Running the Frontend
+### ud83dudd96 Running the Frontend
 
 In development mode:
 
@@ -218,7 +218,7 @@ npm run build
 npm run preview
 ```
 
-### API Endpoints
+### ud83dudd38 API Endpoints
 
 #### Health Check
 - **URL**: `/`
@@ -251,7 +251,7 @@ npm run preview
   }
   ```
 
-## Customization
+## ud83dude9c Customization
 
 ### SubQuery Configuration
 
@@ -307,7 +307,7 @@ To modify the frontend appearance or behavior:
 2. Adjust the Tailwind CSS styles in `frontend/src/index.css`
 3. For color schemes, modify the extended theme in `frontend/tailwind.config.js`
 
-## Connecting Frontend to Backend
+## ud83dudcce Connecting Frontend to Backend
 
 By default, the frontend will look for the backend API at `http://localhost:8000`. To change this:
 
@@ -316,7 +316,7 @@ By default, the frontend will look for the backend API at `http://localhost:8000
    VITE_API_URL=http://your-api-url:port
    ```
 
-## Best Practices
+## u2699ufe0f Best Practices
 
 1. **Data Versioning**: The system saves raw and processed data in CSV files, enabling data versioning and reproducibility.
 
@@ -330,7 +330,7 @@ By default, the frontend will look for the backend API at `http://localhost:8000
 
 6. **Wallet Security**: The wallet integration uses the Polkadot.js extension for secure key management, never exposing private keys.
 
-## Deployment
+## ud83cudf10 Deployment
 
 ### Full-Stack Deployment with Docker
 
@@ -352,11 +352,11 @@ For separate deployment:
 1. Backend: Deploy as a standard FastAPI application using Gunicorn/Uvicorn
 2. Frontend: Build using `npm run build` and serve the static files with Nginx or similar
 
-## License
+## ud83cudfe0 License
 
 [Your chosen license]
 
-## Acknowledgements
+## ud83dudc4f Acknowledgements
 
 - [SubQuery](https://subquery.network/) for providing blockchain data indexing infrastructure
 - [FastAPI](https://fastapi.tiangolo.com/) for the high-performance API framework
