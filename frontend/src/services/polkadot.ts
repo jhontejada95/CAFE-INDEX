@@ -26,6 +26,9 @@ export const initPolkadotApi = async (): Promise<ApiPromise> => {
     await api.isReady;
     console.log('Conexiu00f3n a Westend establecida correctamente');
     
+    // Imprimir informaciu00f3n sobre los mu00e9todos disponibles
+    console.log('Mu00e9todos disponibles en balances:', Object.keys(api.tx.balances));
+    
     return api;
   } catch (error) {
     console.error('Error al conectar con Westend:', error);
@@ -78,17 +81,36 @@ export const getAccounts = async (): Promise<InjectedAccountWithMeta[]> => {
 };
 
 /**
- * Envu00eda una transacciu00f3n para registrar un precio en la blockchain como un log
- * 
- * Esta funciou00f3n utiliza una aproximaciu00f3n minimalista con system.remark
- * para garantizar compatibilidad con cualquier cadena Substrate/Polkadot.
+ * Obtiene el saldo de una cuenta
+ */
+export const getAccountBalance = async (address: string): Promise<{ formatted: string, raw: bigint }> => {
+  if (!api) {
+    await initPolkadotApi();
+  }
+  
+  if (!api) {
+    throw new Error('No se pudo inicializar la API');
+  }
+  
+  const { data: balanceData } = await api.query.system.account(address);
+  const balanceFree = balanceData.free.toBigInt();
+  const balanceFormatted = (Number(balanceFree) / 10**10).toFixed(4); // Convertir a WND con 4 decimales
+  
+  return {
+    formatted: balanceFormatted,
+    raw: balanceFree
+  };
+};
+
+/**
+ * Envu00eda una transferencia simple a otra cuenta en la blockchain
  */
 export const submitPrice = async (
   account: InjectedAccountWithMeta,
   id: string,
   timestamp: number,
   price: number
-): Promise<{ success: boolean; hash?: string; error?: string }> => {
+): Promise<{ success: boolean; hash?: string; error?: string; balance?: string; minBalance?: string }> => {
   try {
     if (!api) {
       await initPolkadotApi();
@@ -98,39 +120,97 @@ export const submitPrice = async (
       throw new Error('No se pudo inicializar la API');
     }
     
+    // Verificar saldo disponible
+    const { data: balanceData } = await api.query.system.account(account.address);
+    const balanceFree = balanceData.free.toBigInt();
+    const balanceFormatted = (Number(balanceFree) / 10**10).toFixed(4); // Convertir a WND con 4 decimales
+    
+    // Obtener una estimaciu00f3n de las tarifas
+    const MIN_BALANCE = BigInt(10000000000); // 0.01 WND
+    const minBalanceFormatted = '0.0100'; // Valor fijo formateado
+    
+    if (balanceFree < MIN_BALANCE) {
+      return { 
+        success: false, 
+        error: `Saldo insuficiente. Se necesita al menos 0.01 WND para transacciones.`,
+        balance: balanceFormatted,
+        minBalance: minBalanceFormatted
+      };
+    }
+    
+    // Direcciu00f3n de la cuenta de destino - usamos la misma cuenta para enviar a su00ed misma
+    const targetAddress = account.address;
+    
+    // Valor mu00ednimo a transferir
+    const transferAmount = 10000000; // 0.001 WND
+    
+    console.log(`Intentando enviar ${transferAmount / 10**10} WND a ${targetAddress}`);
+    
     // Obtener el inyector para la cuenta seleccionada
     const injector = await web3FromSource(account.meta.source);
     
-    // Convertir precio a un entero (multiplicando por 100 y redondeando)
-    const priceUint = Math.round(price * 100);
-    
-    // Crear un texto simple para el registro (muy corto para evitar problemas)
-    const remarkText = `CAFE:${id}:${priceUint}`;
-    
-    // Convertir a hexadecimal para evitar problemas de codificaciu00f3n
-    const remarkHex = stringToHex(remarkText);
-    
-    console.log(`Registrando precio en Westend: ${remarkText}`);
-
-    // Crear la transacciu00f3n utilizando system.remark con el dato hexadecimal
-    const txHash = await api.tx.system
-      .remark(remarkHex)
-      .signAndSend(
-        account.address,
-        { signer: injector.signer },
-        ({ status }) => {
-          if (status.isInBlock) {
-            console.log(`Transacciu00f3n incluida en el bloque: ${status.asInBlock.toHex()}`);
-          } else if (status.isFinalized) {
-            console.log(`Transacciu00f3n finalizada en el bloque: ${status.asFinalized.toHex()}`);
+    // Usamos directamente transferKeepAlive que sabemos que existe en Westend
+    return new Promise((resolve) => {
+      api.tx.balances
+        .transferKeepAlive(targetAddress, transferAmount)
+        .signAndSend(
+          account.address,
+          { signer: injector.signer },
+          (result) => {
+            const { status, dispatchError } = result;
+            
+            if (dispatchError) {
+              let errorMessage = '';
+              if (dispatchError.isModule) {
+                // Para errores de mu00f3dulo, podemos extraer informaciu00f3n
+                try {
+                  const decoded = api?.registry.findMetaError(dispatchError.asModule);
+                  errorMessage = decoded ? `${decoded.section}.${decoded.method}: ${decoded.docs}` : dispatchError.toString();
+                } catch (err) {
+                  errorMessage = `Error de mu00f3dulo: ${dispatchError.toString()}`;
+                }
+              } else {
+                // Otros errores
+                errorMessage = dispatchError.toString();
+              }
+              
+              console.error('Error en transacciu00f3n:', errorMessage);
+              resolve({
+                success: false,
+                error: errorMessage,
+                balance: balanceFormatted,
+                minBalance: minBalanceFormatted
+              });
+            } else if (status.isInBlock || status.isFinalized) {
+              // La transacciu00f3n se ha incluido en un bloque
+              const blockHash = status.isInBlock ? status.asInBlock.toString() : status.asFinalized.toString();
+              console.log(`Transacciu00f3n incluida en bloque: ${blockHash}`);
+              resolve({
+                success: true,
+                hash: blockHash,
+                balance: balanceFormatted,
+                minBalance: minBalanceFormatted
+              });
+            }
           }
-        }
-      );
-    
-    return { success: true, hash: txHash.toHex() };
+        )
+        .catch((error) => {
+          console.error('Error al enviar transacciu00f3n:', error);
+          resolve({
+            success: false,
+            error: error.message,
+            balance: balanceFormatted,
+            minBalance: minBalanceFormatted
+          });
+        });
+    });
+
   } catch (error) {
-    console.error('Error al enviar precio:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Error desconocido' };
+    console.error('Error general:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    };
   }
 };
 
@@ -139,5 +219,6 @@ export default {
   disconnectPolkadotApi,
   checkExtensionInstalled,
   getAccounts,
+  getAccountBalance,
   submitPrice
 };
