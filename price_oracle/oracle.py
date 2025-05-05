@@ -10,7 +10,8 @@ import time
 from datetime import datetime
 import pandas as pd
 from dotenv import load_dotenv
-from substrateinterface import SubstrateInterface, Keypair
+from substrateinterface import SubstrateInterface
+from substrateinterface.keypair import Keypair
 from substrateinterface.exceptions import SubstrateRequestException
 
 # Configurar logging
