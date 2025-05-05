@@ -1,186 +1,234 @@
-import React, { useState, useEffect } from 'react';
-import { getPrediction, PredictionRequest, PredictionResponse, PriceData } from '../services/api';
-import PriceChart from './PriceChart';
-import PolkadotConnector from './PolkadotConnector';
-import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+// src/components/AIQuerySection.tsx
 
-// Componente para la consulta IA
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  getPrediction,
+  PredictionRequest,
+  PredictionResponse,
+  PriceData,
+} from "../services/api";
+import PriceChart from "./PriceChart";
+import PolkadotConnector from "./PolkadotConnector";
+import type { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+
+const containerFade = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5 } },
+};
+
+// Bounce más suave: 102% hover, 98% active, 300ms, ease-out
+const cardHover =
+  "hover:scale-102 active:scale-98 transition-transform duration-300 ease-out";
+
 const AIQuerySection: React.FC = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [predictionData, setPredictionData] = useState<PredictionResponse | null>(null);
-  const [connectedAccount, setConnectedAccount] = useState<InjectedAccountWithMeta | null>(null);
+  const [predictionData, setPredictionData] =
+    useState<PredictionResponse | null>(null);
+  const [connectedAccount, setConnectedAccount] =
+    useState<InjectedAccountWithMeta | null>(null);
 
-  // Manejar el envu00edo de la consulta
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!query.trim()) {
-      setError('Por favor, escribe una pregunta');
+      setError("Por favor, escribe una pregunta");
       return;
     }
-    
     setIsLoading(true);
     setError(null);
-    
+    setPredictionData(null);
+
     try {
       const request: PredictionRequest = {
         prompt: query,
         days_ahead: 30,
-        explanation_required: true
+        explanation_required: true,
       };
-      
-      console.log('Enviando solicitud:', request);
       const response = await getPrediction(request);
-      console.log('Respuesta recibida:', response);
-      
-      // Verificar que la explicaciu00f3n estu00e1 presente
-      if (!response.explanation) {
-        console.warn('La respuesta no incluye explicaciu00f3n');
-      }
-      
       setPredictionData(response);
-    } catch (err) {
-      console.error('Error al obtener predicciu00f3n:', err);
-      setError('Error al comunicarse con el servicio de predicciu00f3n. Por favor, intenta mu00e1s tarde.');
+    } catch {
+      setError(
+        "Error al comunicarse con el servicio de predicción. Por favor, intenta más tarde.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Renderizar el u00faltimo precio histu00f3rico y la predicciu00f3n mu00e1s reciente para mostrar en las tarjetas
   const getCurrentPrice = (): string => {
-    if (!predictionData || !predictionData.historical_prices.length) return 'N/A';
-    const lastPrice = predictionData.historical_prices[predictionData.historical_prices.length - 1];
-    return `$${lastPrice.price.toFixed(2)}`;
+    if (!predictionData?.historical_prices.length) return "N/A";
+    return `$${predictionData.historical_prices.slice(-1)[0].price.toFixed(2)}`;
   };
 
   const getMonthPrediction = (): string => {
-    if (!predictionData || !predictionData.predictions.length) return 'N/A';
-    const lastPrediction = predictionData.predictions[predictionData.predictions.length - 1];
-    return `$${lastPrediction.price.toFixed(2)}`;
+    if (!predictionData?.predictions.length) return "N/A";
+    return `$${predictionData.predictions.slice(-1)[0].price.toFixed(2)}`;
   };
 
-  // Visualizar datos de precios como string para el u00e1rea de respuesta
-  const formatPriceData = (prices: PriceData[]): string => {
-    return prices.map(price => `${price.date}: $${price.price.toFixed(2)}`).join('\n');
-  };
+  const formatPriceData = (prices: PriceData[]): string =>
+    prices.map((p) => `${p.date}: $${p.price.toFixed(2)}`).join("\n");
 
-  // Debug: imprimir en consola cuando cambian los datos de predicciu00f3n
-  useEffect(() => {
-    if (predictionData) {
-      console.log('Datos de predicciu00f3n actualizados:', predictionData);
-      console.log('Explicaciu00f3n:', predictionData.explanation || 'No disponible');
-    }
-  }, [predictionData]);
-
-  // Manejar cambio de cuenta conectada
   const handleAccountChange = (account: InjectedAccountWithMeta | null) => {
     setConnectedAccount(account);
-    console.log('Cuenta conectada:', account ? account.address : 'Ninguna');
   };
 
   return (
-    <div>
-      <div className="card mb-8">
-        <h2 className="text-xl font-semibold text-cafe-purple-700 mb-4">ud83eudd16 Consulta al Agente IA</h2>
-        <form onSubmit={handleSubmit}>
-          <textarea 
-            className="input-field h-32 mb-4" 
-            placeholder="Escribe tu pregunta sobre precios del cafu00e9..."
+    <motion.div
+      variants={containerFade}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8"
+    >
+      {/* Sección de consulta */}
+      <motion.div
+        variants={containerFade}
+        className={`card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${cardHover}`}
+      >
+        <h2 className="text-xl font-semibold text-polkadot-pink-500 mb-4">
+          🔮 Consulta al Agente IA
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <textarea
+            className="
+              w-full h-32 p-4
+              placeholder-gray-400 dark:placeholder-gray-600
+              text-gray-900 dark:text-gray-100
+              bg-gray-50 dark:bg-gray-700
+              border border-gray-300 dark:border-gray-600
+              rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-500
+              transition-colors duration-300
+            "
+            placeholder="Escribe tu pregunta sobre precios del café..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
           />
-          <button 
-            type="submit" 
-            className={`btn-primary ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
+          <button
+            type="submit"
+            className={`
+              w-full py-3 text-white bg-polkadot-pink-500 rounded-lg
+              focus:outline-none focus:ring-2 focus:ring-polkadot-pink-300
+              ${isLoading ? "opacity-70 cursor-wait" : cardHover}
+            `}
             disabled={isLoading}
           >
-            {isLoading ? 'Consultando...' : 'Preguntar'}
+            {isLoading ? (
+              <div className="mx-auto animate-spin h-5 w-5 border-2 border-t-2 border-white rounded-full" />
+            ) : (
+              "Preguntar"
+            )}
           </button>
         </form>
-        
+
         {error && (
-          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+          <motion.div
+            variants={containerFade}
+            className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg"
+          >
             {error}
+          </motion.div>
+        )}
+
+        {isLoading && (
+          <div className="space-y-4 mt-6">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </div>
         )}
-        
-        {predictionData && (
-          <div className="mt-6 p-4 border border-cafe-purple-200 rounded-lg bg-cafe-purple-50">
+
+        {predictionData && !isLoading && (
+          <motion.div
+            variants={containerFade}
+            className="
+              mt-6 p-4 rounded-lg
+              bg-polkadot-pink-50 dark:bg-polkadot-pink-800
+              border border-polkadot-pink-200 dark:border-polkadot-pink-500
+              text-gray-900 dark:text-gray-100
+              transition-colors duration-300
+            "
+          >
             <h3 className="font-semibold mb-2">Respuesta:</h3>
-            {predictionData.explanation ? (
-              <p className="text-gray-700 whitespace-pre-line">{predictionData.explanation}</p>
-            ) : (
-              <p className="text-gray-500 italic">No hay explicaciu00f3n disponible</p>
-            )}
-            
-            {predictionData.historical_prices.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium text-sm text-gray-600">Precios Histu00f3ricos:</h4>
-                <pre className="text-xs bg-white p-2 rounded mt-1 overflow-x-auto">
-                  {formatPriceData(predictionData.historical_prices)}
-                </pre>
-              </div>
-            )}
-            
-            {predictionData.predictions.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium text-sm text-gray-600">Predicciones:</h4>
-                <pre className="text-xs bg-white p-2 rounded mt-1 overflow-x-auto">
-                  {formatPriceData(predictionData.predictions)}
-                </pre>
-              </div>
-            )}
-          </div>
+            <p className="whitespace-pre-line">
+              {predictionData.explanation || "No hay explicación disponible"}
+            </p>
+          </motion.div>
         )}
-      </div>
-      
-      {/* Actualizar los componentes de tarjetas con datos reales */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          {/* Ahora usamos el componente PriceChart para mostrar el gru00e1fico */}
-          <div className="card h-full">
-            <h2 className="text-xl font-semibold text-cafe-purple-700 mb-4">Histu00f3rico de Precios</h2>
-            {predictionData ? (
-              <PriceChart 
-                historicalPrices={predictionData.historical_prices} 
-                predictions={predictionData.predictions} 
-              />
-            ) : (
-              <div className="bg-cafe-purple-100 h-64 flex items-center justify-center rounded-lg">
-                <p className="text-cafe-purple-600 font-medium">Consulta al agente para ver el gru00e1fico de precios</p>
-              </div>
-            )}
-          </div>
-        </div>
+      </motion.div>
 
-        <div className="space-y-6">
-          {/* Current Price Card */}
-          <div className="card">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-700">Precio Actual</h2>
-              <span className="text-2xl">ud83dudcb5</span>
+      {/* Gráficos y tarjetas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div
+          variants={containerFade}
+          className={`lg:col-span-2 card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${cardHover}`}
+        >
+          <h2 className="text-xl font-semibold text-polkadot-pink-500 mb-4">
+            📈 Histórico de Precios
+          </h2>
+          {isLoading ? (
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          ) : predictionData ? (
+            <PriceChart
+              historicalPrices={predictionData.historical_prices}
+              predictions={predictionData.predictions}
+            />
+          ) : (
+            <div className="h-64 bg-polkadot-pink-100 dark:bg-polkadot-pink-700 flex items-center justify-center rounded-lg">
+              <p className="text-polkadot-pink-600">
+                Consulta para ver el gráfico
+              </p>
             </div>
-            <p className="text-3xl font-bold text-cafe-purple-600 mt-2">{getCurrentPrice()} / lb</p>
-          </div>
+          )}
+        </motion.div>
 
-          {/* Monthly Prediction Card */}
-          <div className="card">
+        <motion.div variants={containerFade} className="space-y-6">
+          <motion.div
+            variants={containerFade}
+            className={`card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${cardHover}`}
+          >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-700">Predicciu00f3n Mes</h2>
-              <span className="text-2xl">ud83dudcc8</span>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Precio Actual
+              </h3>
+              {isLoading ? (
+                <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+              ) : (
+                <span className="text-2xl">💵</span>
+              )}
             </div>
-            <p className="text-3xl font-bold text-cafe-purple-600 mt-2">{getMonthPrediction()} / lb</p>
-          </div>
+            <p className="text-3xl font-bold text-polkadot-pink-500 mt-2">
+              {getCurrentPrice()} / lb
+            </p>
+          </motion.div>
 
-          {/* Polkadot Wallet Connector - Nuevo componente */}
-          <PolkadotConnector onAccountChange={handleAccountChange} />
-        </div>
+          <motion.div
+            variants={containerFade}
+            className={`card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${cardHover}`}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-700">
+                🔮 Predicción del Mes
+              </h3>
+              {isLoading ? (
+                <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+              ) : (
+                <span className="text-2xl">📈</span>
+              )}
+            </div>
+            <p className="text-3xl font-bold text-polkadot-pink-500 mt-2">
+              {getMonthPrediction()} / lb
+            </p>
+          </motion.div>
+
+          <motion.div variants={containerFade}>
+            <PolkadotConnector onAccountChange={handleAccountChange} />
+          </motion.div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

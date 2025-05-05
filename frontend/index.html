@@ -1,13 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cafu00e9Index AI - Predicciu00f3n de Precios</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CaféIndex AI - Predicción de Precios</title>
+
+        <!-- Script inicial para aplicar tema oscuro antes de que React cargue -->
+        <script>
+            (function () {
+                try {
+                    const stored = localStorage.getItem("theme");
+                    const prefersDark = window.matchMedia(
+                        "(prefers-color-scheme: dark)",
+                    ).matches;
+                    if (stored === "dark" || (!stored && prefersDark)) {
+                        document.documentElement.classList.add("dark");
+                    }
+                } catch (e) {
+                    console.error("Error al aplicar tema inicial:", e);
+                }
+            })();
+        </script>
+    </head>
+    <body class="bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
 </html>
