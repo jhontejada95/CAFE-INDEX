@@ -46,7 +46,7 @@ const AIQuerySection: React.FC = () => {
     try {
       const request: PredictionRequest = {
         prompt: query,
-        days_ahead: 30,
+        days_ahead: 5, // Cambiado de 30 a 5 días
         explanation_required: true,
       };
       const response = await getPrediction(request);
