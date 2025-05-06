@@ -3,6 +3,7 @@
 import React from "react";
 import AIQuerySection from "./components/AIQuerySection";
 import { ThemeSwitcher } from "./components/ThemeSwitcher";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
 
 const App: React.FC = () => {
   return (
@@ -13,8 +14,9 @@ const App: React.FC = () => {
           {/* Título */}
           <h1 className="text-2xl md:text-3xl font-bold">☕ CaféIndex AI</h1>
 
-          {/* Switch y logo */}
+          {/* Selector de idioma, switch de tema y logo */}
           <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
             <ThemeSwitcher />
             <img
               src="/images/polkadot-logo.svg"
@@ -41,23 +43,23 @@ const App: React.FC = () => {
             <div
               className="h-6 w-6 bg-polkadot-pink-500 rounded-full"
               title="React"
-            ></div>
+            />
             <div
               className="h-6 w-6 bg-polkadot-pink-300 rounded-full"
               title="Tailwind CSS"
-            ></div>
+            />
             <div
               className="h-6 w-6 bg-polkadot-pink-700 rounded-full"
               title="SubQuery"
-            ></div>
+            />
             <div
               className="h-6 w-6 bg-polkadot-pink-400 rounded-full"
               title="Python"
-            ></div>
+            />
             <div
               className="h-6 w-6 bg-polkadot-pink-200 rounded-full"
               title="DeepSeek"
-            ></div>
+            />
           </div>
         </div>
       </footer>

@@ -1,5 +1,7 @@
 // tailwind.config.js
 
+import typography from "@tailwindcss/typography";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   // Usar la clase 'dark' en vez de la preferencia del sistema
@@ -43,5 +45,8 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    typography,
+    // aquí puedes añadir otros plugins en el futuro
+  ],
 };
