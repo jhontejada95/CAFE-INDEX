@@ -1,6 +1,6 @@
 # u2615 Cafu00e9Index AI: Price Indexing and Prediction ud83dudcc8
 
-Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization, and Polkadot/Substrate for on-chain price oracle functionality.
+Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization, and supports both Polkadot/Substrate and Ethereum (EVM) integration for on-chain price oracle functionality.
 
 ## u2728 Features
 
@@ -28,12 +28,13 @@ Cafu00e9Index AI is a comprehensive solution for indexing on-chain coffee prices
    - Real-time price visualization and AI interaction
 
 6. **ud83cudfdd On-chain Price Oracle**
-   - Publishes coffee price data to Polkadot's Westend testnet
+   - Publishes coffee price data to Polkadot's Westend testnet or Ethereum-compatible networks
    - Creates a public, auditable record of price history
    - Periodic submissions via scheduled jobs (every 15 minutes)
 
-7. **ud83dudd11 Wallet Integration**
-   - Connect Polkadot.js wallet directly from the frontend
+7. **ud83dudd11 Multi-Chain Wallet Integration**
+   - Connect Polkadot.js wallet for Substrate networks
+   - Connect MetaMask wallet for Ethereum/EVM networks
    - Select accounts and view balances
    - Submit coffee price data on-chain with transaction signing
 
@@ -56,8 +57,9 @@ u2502   u2514u2500u2500 test_oracle.py   # Testing utility for the oracle
 u251cu2500u2500 frontend/             # React frontend application
 u2502   u251cu2500u2500 src/             # Source code for React components
 u2502   u2502   u251cu2500u2500 components/  # React components
-u2502   u2502   u2514u2500u2500 services/    # Service modules including Polkadot wallet integration
+u2502   u2502   u2514u2500u2500 services/    # Service modules for wallet integration
 u2502   u2514u2500u2500 public/          # Static assets
+u2502   u2514u2500u2500 contracts/        # Smart contract files
 u251cu2500u2500 config.py             # Configuration settings
 u251cu2500u2500 utils.py              # Utility functions
 u251cu2500u2500 main.py               # Main script for running the pipeline
@@ -74,8 +76,10 @@ u2514u2500u2500 README.md             # Project documentation
 - Docker and Docker Compose (for containerized deployment)
 - SubQuery node or access to a SubQuery GraphQL endpoint
 - DeepSeek API key (optional, for explanation feature)
-- Westend account with funds (for the price oracle functionality)
-- Polkadot.js Browser Extension (for wallet integration)
+- Westend account with funds (for the Polkadot price oracle functionality)
+- Polkadot.js Browser Extension (for Polkadot wallet integration)
+- MetaMask Browser Extension (for Ethereum wallet integration)
+- Access to an EVM-compatible network (for Ethereum integration)
 
 ## ud83dudd29 Installation
 
@@ -118,6 +122,12 @@ u2514u2500u2500 README.md             # Project documentation
    yarn
    ```
 
+3. Set up frontend environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your settings including EVM network and contract address
+   ```
+
 ### Docker Installation
 
 1. Build and start the containers:
@@ -143,7 +153,9 @@ python main.py --skip-index --skip-process --skip-train
 
 ### ud83dudc36 Using the Price Oracle
 
-The price oracle functionality allows you to submit coffee price data to the Westend testnet:
+The price oracle functionality allows you to submit coffee price data to the Westend testnet or Ethereum-compatible networks.
+
+#### Polkadot/Westend Oracle
 
 1. Set up your Westend account in `.env` file:
    ```
@@ -166,23 +178,41 @@ The price oracle functionality allows you to submit coffee price data to the Wes
    python main.py --oracle submit --hours 24
    ```
 
-5. Set up a cron job to run every 15 minutes:
+#### Ethereum Oracle (EVM)
+
+1. Configure the Ethereum network and contract settings in the frontend `.env` file:
    ```
-   */15 * * * * cd /path/to/CAFE-INDEX && python main.py --oracle submit --hours 1
+   VITE_EVM_RPC_URL=https://your-evm-rpc-url
+   VITE_CONTRACT_ADDRESS=0xYourContractAddress
    ```
+
+2. Use the frontend to connect to MetaMask and submit prices to the contract
 
 ### ud83dudd10 Using the Frontend Wallet Integration
 
-The frontend includes a wallet connection feature that allows users to interact directly with the Polkadot blockchain:
+The frontend includes wallet connection features that allow users to interact directly with both Polkadot and Ethereum blockchains:
+
+#### Polkadot Wallet Integration
 
 1. Install the [Polkadot.js Extension](https://polkadot.js.org/extension/) in your browser
 2. Create or import an account in the extension
 3. Launch the frontend application
-4. Click "Connect Wallet" in the interface
-5. Select your account from the dropdown when prompted
-6. Use the "Send Price Test" button to submit a price to the blockchain
+4. Select the "Polkadot" tab in the wallet section
+5. Click "Connect Wallet" in the interface
+6. Select your account from the dropdown when prompted
+7. Use the "Send Price Test" button to submit a price to the blockchain
 
-**Note:** This feature requires the Polkadot.js Browser Extension to be installed and configured with at least one account.
+#### Ethereum Wallet Integration
+
+1. Install the [MetaMask Extension](https://metamask.io/download/) in your browser
+2. Create or import an account in MetaMask
+3. Launch the frontend application
+4. Select the "Ethereum" tab in the wallet section
+5. Click "Connect Wallet" in the interface
+6. Approve the connection in the MetaMask popup
+7. Use the "Send Price Test" button to submit a price to the CafeIndex contract
+
+**Note:** The Ethereum integration requires the deployed CafeIndex.sol contract on an EVM-compatible network. The address of this contract should be specified in the `.env` file.
 
 ### ud83dudc80 Starting the Backend API
 
@@ -273,6 +303,8 @@ You can also change the DeepSeek model by updating the `DEEPSEEK_MODEL` variable
 
 ### Oracle Configuration
 
+#### Polkadot Oracle Configuration
+
 To configure the Westend price oracle:
 
 1. **Connection**: You can use a custom Westend RPC endpoint by updating the `WESTEND_WS_URL` variable in `.env`
@@ -281,7 +313,19 @@ To configure the Westend price oracle:
 
 3. **Custom ID Format**: Modify the oracle's ID generation in `price_oracle/run_oracle.py` if you want to use a different format.
 
+#### Ethereum Oracle Configuration
+
+To configure the Ethereum integration:
+
+1. **RPC URL**: Update the `VITE_EVM_RPC_URL` in the frontend `.env` file to point to your preferred EVM-compatible network's RPC endpoint.
+
+2. **Contract Address**: Set the `VITE_CONTRACT_ADDRESS` in the frontend `.env` file to the address of your deployed CafeIndex contract.
+
+3. **Custom ABI**: If you modify the contract, update the ABI in `src/services/ethereum.ts` to match your contract's interface.
+
 ### Wallet Integration Customization
+
+#### Polkadot Wallet Integration
 
 The Polkadot.js wallet integration can be customized in several ways:
 
@@ -293,11 +337,15 @@ The Polkadot.js wallet integration can be customized in several ways:
 
 4. **UI Customization**: The wallet connector component in `src/components/PolkadotConnector.tsx` can be styled and modified to match your requirements
 
-**Note about `priceFeed` Module**: The current implementation attempts to use a `priceFeed` module that may not be available on the standard Westend testnet. For a production environment, you would need to:
+#### Ethereum Wallet Integration
 
-1. Deploy a custom Substrate chain with the appropriate pallets
-2. Use a parachain with support for the required functionality
-3. Implement an alternative approach using contract calls or `system.remark`
+The MetaMask/Ethereum wallet integration can be customized in several ways:
+
+1. **Networks**: Modify the networks in `getNetworkName` function in `src/components/EthereumConnector.tsx` to support additional EVM-compatible networks
+
+2. **Contract Interface**: Update the contract ABI in `src/services/ethereum.ts` if you modify the CafeIndex contract
+
+3. **UI Customization**: The wallet connector component in `src/components/EthereumConnector.tsx` can be styled and modified to match your requirements
 
 ### Frontend Customization
 
@@ -314,6 +362,8 @@ By default, the frontend will look for the backend API at `http://localhost:8000
 1. Create a `.env` file in the frontend directory:
    ```
    VITE_API_URL=http://your-api-url:port
+   VITE_EVM_RPC_URL=https://your-evm-rpc-url
+   VITE_CONTRACT_ADDRESS=0xYourContractAddress
    ```
 
 ## u2699ufe0f Best Practices
@@ -328,7 +378,9 @@ By default, the frontend will look for the backend API at `http://localhost:8000
 
 5. **Configuration Management**: Central configuration in `config.py` makes the system easy to customize.
 
-6. **Wallet Security**: The wallet integration uses the Polkadot.js extension for secure key management, never exposing private keys.
+6. **Wallet Security**: The wallet integrations use secure browser extensions (Polkadot.js and MetaMask) for key management, never exposing private keys.
+
+7. **Multi-chain Support**: The application supports both Substrate-based networks and EVM-compatible networks for maximum flexibility.
 
 ## ud83cudf10 Deployment
 
@@ -367,3 +419,6 @@ For separate deployment:
 - [Vite](https://vitejs.dev/) for frontend tooling and development
 - [Polkadot/Substrate](https://polkadot.network/) for the blockchain infrastructure
 - [Polkadot.js](https://polkadot.js.org/) for browser extension and API tools
+- [Ethereum](https://ethereum.org/) for the EVM-compatible blockchain infrastructure
+- [ethers.js](https://docs.ethers.org/) for Ethereum blockchain interaction
+- [MetaMask](https://metamask.io/) for Ethereum wallet integration

@@ -1,40 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import ethereumService from '../services/ethereum';
+import * as ethers from 'ethers';
+import { 
+  initEthereumContract,
+  initEthereumProvider,
+  submitPrice as submitPriceToContract,
+  getAccountBalance
+} from '../services/ethereum';
 
 interface EthereumConnectorProps {
   onAccountChange?: (account: string | null) => void;
 }
 
+// URL RPC y dirección del contrato desde las variables de entorno
+const DEFAULT_RPC_URL = import.meta.env.VITE_EVM_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com'; // Sepolia testnet por defecto
+const DEFAULT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000'; // Dirección por defecto
+
 const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }) => {
-  const [extensionFound, setExtensionFound] = useState<boolean | null>(null);
-  const [accounts, setAccounts] = useState<string[]>([]);
-  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
+  const [hasProvider, setHasProvider] = useState<boolean | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [account, setAccount] = useState<string | null>(null);
+  const [chainId, setChainId] = useState<number | null>(null);
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState<{success: boolean; message: string} | null>(null);
   const [accountBalance, setAccountBalance] = useState<string | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-  const [contractAddress, setContractAddress] = useState<string>('');
-  const [isDeployed, setIsDeployed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{success: boolean; message: string} | null>(null);
 
-  // Comprobar si la extensiu00f3n estu00e1 instalada cuando se carga el componente
+  // Comprobar si tenemos acceso a la API de Ethereum
   useEffect(() => {
-    const checkExtension = async () => {
-      const found = await ethereumService.checkWalletExtension();
-      setExtensionFound(found);
+    const checkProvider = async () => {
+      const provider = window.ethereum;
+      setHasProvider(!!provider);
     };
     
-    checkExtension();
+    checkProvider();
   }, []);
 
-  // Cargar el saldo cuando cambia la cuenta seleccionada
+  // Efecto para cargar el saldo cuando cambia la cuenta
   useEffect(() => {
     const loadBalance = async () => {
-      if (selectedAccount) {
+      if (account) {
         setIsLoadingBalance(true);
         try {
-          const balance = await ethereumService.getBalance(selectedAccount);
+          const balance = await getAccountBalance(account, DEFAULT_RPC_URL);
           setAccountBalance(balance.formatted);
         } catch (error) {
           console.error('Error al cargar el saldo:', error);
@@ -48,59 +58,89 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
     };
     
     loadBalance();
-  }, [selectedAccount]);
+  }, [account]);
 
-  // Conectar a la wallet
+  // Manejar cambios de cuenta
+  const handleAccountsChanged = (accounts: string[]) => {
+    if (accounts.length === 0) {
+      // El usuario se desconectó
+      setAccount(null);
+      setIsConnected(false);
+      if (onAccountChange) onAccountChange(null);
+    } else {
+      // Establecer la nueva cuenta activa
+      setAccount(accounts[0]);
+      setIsConnected(true);
+      if (onAccountChange) onAccountChange(accounts[0]);
+    }
+  };
+
+  // Manejar cambios de red
+  const handleChainChanged = (chainIdHex: string) => {
+    setChainId(parseInt(chainIdHex, 16));
+  };
+
+  // Añadir event listeners para MetaMask
+  useEffect(() => {
+    if (window.ethereum) {
+      // Listeners para eventos de MetaMask
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+      };
+    }
+  }, []);
+
+  // Conectar a MetaMask
   const connectWallet = async () => {
+    if (!window.ethereum) {
+      setConnectionError('MetaMask no está instalado. Por favor instala la extensión.');
+      return;
+    }
+
     setIsConnecting(true);
     setConnectionError(null);
     
     try {
-      // Inicializar la conexiu00f3n Web3
-      const initialized = await ethereumService.initWeb3();
+      // Solicitar conexión de cuentas
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       
-      if (!initialized) {
-        setConnectionError('No se pudo inicializar la conexiu00f3n Web3');
-        return;
-      }
+      // Obtener chainId actual
+      const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(chainIdHex, 16);
+      setChainId(currentChainId);
       
-      // Obtener cuentas disponibles
-      const availableAccounts = await ethereumService.getAccounts();
+      // Inicializar el proveedor primero con la URL RPC 
+      await initEthereumProvider(DEFAULT_RPC_URL);
       
-      if (availableAccounts.length === 0) {
-        setConnectionError('No se encontraron cuentas en la wallet');
-      } else {
-        setAccounts(availableAccounts);
-        // Seleccionar la primera cuenta por defecto
-        setSelectedAccount(availableAccounts[0]);
-        if (onAccountChange) {
-          onAccountChange(availableAccounts[0]);
-        }
-      }
+      // Crear provider y signer
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const newSigner = await provider.getSigner();
+      setSigner(newSigner);
+      
+      // Inicializar contrato
+      await initEthereumContract(DEFAULT_CONTRACT_ADDRESS, DEFAULT_RPC_URL);
+      
+      // Actualizar estado con la cuenta conectada
+      handleAccountsChanged(accounts);
     } catch (error) {
-      console.error('Error al conectar wallet:', error);
+      console.error('Error al conectar con MetaMask:', error);
       setConnectionError(error instanceof Error ? error.message : 'Error desconocido al conectar');
     } finally {
       setIsConnecting(false);
     }
   };
 
-  // Cambiar la cuenta seleccionada
-  const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const address = e.target.value;
-    setSelectedAccount(address);
-    if (onAccountChange) {
-      onAccountChange(address);
-    }
-  };
-
-  // Actualizar el saldo de la cuenta
+  // Actualizar el saldo
   const refreshBalance = async () => {
-    if (!selectedAccount) return;
+    if (!account) return;
     
     setIsLoadingBalance(true);
     try {
-      const balance = await ethereumService.getBalance(selectedAccount);
+      const balance = await getAccountBalance(account, DEFAULT_RPC_URL);
       setAccountBalance(balance.formatted);
     } catch (error) {
       console.error('Error al actualizar el saldo:', error);
@@ -110,42 +150,22 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
     }
   };
 
-  // Actualizar la direcciu00f3n del contrato
-  const handleContractAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContractAddress(e.target.value);
-  };
-
-  // Guardar la direcciu00f3n del contrato
-  const saveContractAddress = () => {
-    if (contractAddress) {
-      ethereumService.setContractAddress(contractAddress);
-      setIsDeployed(true);
-      setSubmitResult({
-        success: true,
-        message: `Direcciu00f3n del contrato guardada: ${contractAddress}`
-      });
-    } else {
-      setSubmitResult({
-        success: false,
-        message: 'Introduce una direcciu00f3n de contrato vu00e1lida'
-      });
-    }
-  };
-
-  // Prueba de envu00edo de precio
+  // Enviar un precio de prueba al contrato
   const handleSubmitTestPrice = async () => {
-    if (!selectedAccount || !isDeployed) return;
+    if (!account || !signer) return;
     
     setIsSubmitting(true);
     setSubmitResult(null);
     
     try {
-      // Valores de prueba para la demostraciu00f3n
-      const testId = `CAFE-ETH-${Date.now()}`;
-      const testTimestamp = Math.floor(Date.now() / 1000); // timestamp actual en segundos
-      const testPrice = 3.75; // precio de prueba
+      // Valores de prueba para la demostración
+      const testId = `CAFE-TEST-${Date.now()}`;
+      const testTimestamp = Math.floor(Date.now() / 1000); // timestamp en segundos
+      const testPrice = 375; // 3.75 USD en centavos
       
-      const result = await ethereumService.submitPrice(
+      const result = await submitPriceToContract(
+        account,
+        signer,
         testId,
         testTimestamp,
         testPrice
@@ -154,13 +174,8 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
       if (result.success) {
         setSubmitResult({
           success: true,
-          message: `Transacciu00f3n enviada correctamente. Hash: ${result.hash}\n\nLa transacciu00f3n se ha registrado en la blockchain exitosamente.`
+          message: `Transacción enviada correctamente. Hash: ${result.hash}\n\nLa transacción se ha registrado en la blockchain exitosamente.`
         });
-        
-        // Actualizar el saldo si estu00e1 disponible
-        if (result.balance) {
-          setAccountBalance(result.balance);
-        }
       } else {
         setSubmitResult({
           success: false,
@@ -175,18 +190,35 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
       });
     } finally {
       setIsSubmitting(false);
-      // Actualizar el saldo despuu00e9s de completar la operaciu00f3n
+      // Actualizar el saldo después de completar la operación
       refreshBalance();
     }
   };
 
+  // Obtener el nombre de la red según el chainId
+  const getNetworkName = (id: number | null): string => {
+    if (id === null) return 'Desconocida';
+    
+    const networks: {[key: number]: string} = {
+      1: 'Ethereum Mainnet',
+      5: 'Goerli Testnet',
+      11155111: 'Sepolia Testnet',
+      137: 'Polygon Mainnet',
+      80001: 'Mumbai Testnet',
+      56: 'BSC Mainnet',
+      97: 'BSC Testnet'
+    };
+    
+    return networks[id] || `Cadena ${id}`;
+  };
+
   return (
     <div className="card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-colors duration-300">
-      <h3 className="text-xl font-semibold text-polkadot-pink-500 dark:text-polkadot-pink-300 mb-4">🦊 Conectar Wallet Ethereum</h3>
+      <h3 className="text-xl font-semibold text-polkadot-pink-500 dark:text-polkadot-pink-300 mb-4">🔗 Conectar Wallet Ethereum</h3>
       
-      {extensionFound === false && (
+      {hasProvider === false && (
         <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-lg transition-colors duration-300">
-          <p>No se encontru00f3 MetaMask. Por favor instu00e1lala desde 
+          <p>No se encontró MetaMask. Por favor instala la extensión desde
             <a href="https://metamask.io/download/" 
                target="_blank" 
                rel="noopener noreferrer"
@@ -203,7 +235,7 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
         </div>
       )}
       
-      {selectedAccount ? (
+      {isConnected && account ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -211,7 +243,7 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
               <span className="font-medium text-gray-900 dark:text-gray-100">Conectado</span>
             </div>
             
-            {/* Secciu00f3n de saldo */}
+            {/* Sección de saldo */}
             <div className="flex items-center">
               <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Saldo:</span>
               {isLoadingBalance ? (
@@ -226,84 +258,52 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
                 onClick={refreshBalance}
                 title="Actualizar saldo"
               >
-                ud83dudd04
+                🔄
               </button>
             </div>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Cuenta seleccionada
+              Cuenta conectada
             </label>
-            <select 
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 
-                        bg-gray-50 dark:bg-gray-700 
-                        text-gray-900 dark:text-gray-100
-                        rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-500 
-                        transition-colors duration-300"
-              value={selectedAccount}
-              onChange={handleAccountChange}
-            >
-              {accounts.map(account => (
-                <option key={account} value={account}>
-                  {account.substring(0, 8)}...{account.substring(account.length - 6)}
-                </option>
-              ))}
-            </select>
+            <div className="p-2 border border-gray-300 dark:border-gray-600 
+                          bg-gray-50 dark:bg-gray-700 
+                          text-gray-900 dark:text-gray-100
+                          rounded-lg transition-colors duration-300">
+              {account.substring(0, 10)}...{account.substring(account.length - 8)}
+            </div>
           </div>
           
-          {/* Secciu00f3n de configuraciu00f3n del contrato */}
-          {!isDeployed ? (
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Direcciu00f3n del contrato desplegado
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  className="flex-grow p-2 border border-gray-300 dark:border-gray-600 
-                            bg-gray-50 dark:bg-gray-700 
-                            text-gray-900 dark:text-gray-100
-                            rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-500 
-                            transition-colors duration-300"
-                  placeholder="0x..."
-                  value={contractAddress}
-                  onChange={handleContractAddressChange}
-                />
-                <button
-                  className="px-4 py-2 text-white 
-                            bg-polkadot-pink-500 hover:bg-polkadot-pink-600 
-                            dark:bg-polkadot-pink-600 dark:hover:bg-polkadot-pink-700
-                            rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-300
-                            transition-colors duration-300"
-                  onClick={saveContractAddress}
-                >
-                  Guardar
-                </button>
-              </div>
-              <div className="mt-2 text-xs text-gray-500">
-                Despliegue el contrato en Remix y pegue la direcciu00f3n aquu00ed
-              </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Red actual
+            </label>
+            <div className="p-2 border border-gray-300 dark:border-gray-600 
+                          bg-gray-50 dark:bg-gray-700 
+                          text-gray-900 dark:text-gray-100
+                          rounded-lg transition-colors duration-300">
+              {getNetworkName(chainId)}
             </div>
-          ) : (
-            <div className="pt-2">
-              <button
-                className="w-full py-3 text-white 
-                          bg-polkadot-pink-500 hover:bg-polkadot-pink-600 
-                          dark:bg-polkadot-pink-600 dark:hover:bg-polkadot-pink-700
-                          rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-300
-                          transition-colors duration-300"
-                onClick={handleSubmitTestPrice}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="mx-auto animate-spin h-5 w-5 border-2 border-t-2 border-white rounded-full" />
-                ) : (
-                  'Enviar Precio a Ethereum'
-                )}
-              </button>
-            </div>
-          )}
+          </div>
+          
+          <div className="pt-2">
+            <button
+              className="w-full py-3 text-white 
+                        bg-polkadot-pink-500 hover:bg-polkadot-pink-600 
+                        dark:bg-polkadot-pink-600 dark:hover:bg-polkadot-pink-700
+                        rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-300
+                        transition-colors duration-300"
+              onClick={handleSubmitTestPrice}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="mx-auto animate-spin h-5 w-5 border-2 border-t-2 border-white rounded-full" />
+              ) : (
+                'Enviar Precio de Prueba'
+              )}
+            </button>
+          </div>
           
           {submitResult && (
             <div className={`mt-3 p-3 rounded-lg transition-colors duration-300 ${
@@ -319,7 +319,6 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
               ))}
             </div>
           )}
-          
         </div>
       ) : (
         <button
@@ -329,12 +328,12 @@ const EthereumConnector: React.FC<EthereumConnectorProps> = ({ onAccountChange }
                     rounded-lg focus:outline-none focus:ring-2 focus:ring-polkadot-pink-300
                     transition-colors duration-300"
           onClick={connectWallet}
-          disabled={isConnecting || extensionFound === false}
+          disabled={isConnecting || hasProvider === false}
         >
           {isConnecting ? (
             <div className="mx-auto animate-spin h-5 w-5 border-2 border-t-2 border-white rounded-full" />
           ) : (
-            'Conectar MetaMask'
+            'Conectar Wallet'
           )}
         </button>
       )}

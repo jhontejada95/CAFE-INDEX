@@ -1,4 +1,4 @@
-// Importar ethers de manera más compatible con diferentes entornos
+// Importar ethers de manera mu00e1s compatible con diferentes entornos
 import * as ethers from 'ethers';
 
 // ABI del contrato CafeIndex
@@ -13,7 +13,7 @@ const CAFEINDEX_ABI = [
   "function priceCount() public view returns (uint256)"
 ];
 
-// La dirección del contrato necesita ser configurada
+// La direcciu00f3n del contrato necesita ser configurada
 let CONTRACT_ADDRESS = '';
 
 // Instancia del proveedor y contrato
@@ -50,7 +50,7 @@ export const getProvider = async (rpcUrl?: string): Promise<ethers.JsonRpcProvid
 };
 
 /**
- * Inicializa la conexión con el contrato EVM
+ * Inicializa la conexiu00f3n con el contrato EVM
  */
 export const initEthereumContract = async (contractAddress: string, rpcUrl: string): Promise<ethers.Contract> => {
   if (contract && CONTRACT_ADDRESS === contractAddress) return contract;
@@ -65,7 +65,7 @@ export const initEthereumContract = async (contractAddress: string, rpcUrl: stri
     contract = new ethers.Contract(contractAddress, CAFEINDEX_ABI, ethProvider);
     CONTRACT_ADDRESS = contractAddress;
     
-    console.log('Conexión al contrato establecida correctamente');
+    console.log('Conexiu00f3n al contrato establecida correctamente');
     return contract;
   } catch (error) {
     console.error('Error al conectar con el contrato:', error);
@@ -74,7 +74,7 @@ export const initEthereumContract = async (contractAddress: string, rpcUrl: stri
 };
 
 /**
- * Envía un precio al contrato
+ * Envu00eda un precio al contrato
  */
 export const submitPrice = async (
   account: string,
@@ -93,13 +93,13 @@ export const submitPrice = async (
     // Conectar el contrato con el firmante
     const contractWithSigner = contract.connect(signer);
     
-    // Enviar la transacción
+    // Enviar la transacciu00f3n
     const tx = await contractWithSigner.submitPrice(id, timestamp, price);
-    console.log('Transacción enviada:', tx.hash);
+    console.log('Transacciu00f3n enviada:', tx.hash);
     
-    // Esperar a que la transacción se confirme
+    // Esperar a que la transacciu00f3n se confirme
     const receipt = await tx.wait();
-    console.log('Transacción confirmada:', receipt);
+    console.log('Transacciu00f3n confirmada:', receipt);
     
     return {
       success: true,
@@ -122,30 +122,14 @@ export const getAccountBalance = async (address: string, rpcUrl?: string): Promi
     // Si no hay proveedor, intentamos inicializarlo (si se proporciona rpcUrl)
     if (!provider) {
       if (!rpcUrl) {
-        console.warn('Proveedor no inicializado y no se proporcionó URL RPC');
-        return {
-          formatted: '0.0000',
-          raw: BigInt(0)
-        };
+        throw new Error('Proveedor no inicializado y no se proporcionu00f3 URL RPC');
       }
-      try {
-        await initEthereumProvider(rpcUrl);
-      } catch (initError) {
-        console.error('Error al inicializar el proveedor:', initError);
-        return {
-          formatted: '0.0000',
-          raw: BigInt(0)
-        };
-      }
+      await initEthereumProvider(rpcUrl);
     }
     
     // Verificar nuevamente si tenemos proveedor
     if (!provider) {
-      console.warn('No se pudo inicializar el proveedor');
-      return {
-        formatted: '0.0000',
-        raw: BigInt(0)
-      };
+      throw new Error('No se pudo inicializar el proveedor');
     }
     
     const balance = await provider.getBalance(address);
@@ -165,7 +149,7 @@ export const getAccountBalance = async (address: string, rpcUrl?: string): Promi
 };
 
 /**
- * Obtiene un precio específico del contrato por índice
+ * Obtiene un precio especu00edfico del contrato por u00edndice
  */
 export const getPriceByIndex = async (index: number): Promise<{ id: string, timestamp: bigint, price: bigint, submitter: string }> => {
   if (!contract) {
@@ -182,7 +166,7 @@ export const getPriceByIndex = async (index: number): Promise<{ id: string, time
 };
 
 /**
- * Obtiene el número total de precios en el contrato
+ * Obtiene el nu00famero total de precios en el contrato
  */
 export const getPriceCount = async (): Promise<number> => {
   if (!contract) {

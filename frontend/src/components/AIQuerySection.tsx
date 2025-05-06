@@ -31,7 +31,7 @@ const AIQuerySection: React.FC = () => {
   const [connectedAccount, setConnectedAccount] =
     useState<InjectedAccountWithMeta | null>(null);
   const [connectedEthAccount, setConnectedEthAccount] = useState<string | null>(null);
-  const [activeConnector, setActiveConnector] = useState<'polkadot' | 'ethereum'>('polkadot');
+  const [activeConnector, setActiveConnector] = useState<'polkadot' | 'ethereum'>('ethereum'); // Cambiado a ethereum por defecto
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
