@@ -10,6 +10,7 @@ import {
 } from "../services/api";
 import PriceChart from "./PriceChart";
 import PolkadotConnector from "./PolkadotConnector";
+import EthereumConnector from "./EthereumConnector";
 import type { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
 const containerFade = {
@@ -29,6 +30,8 @@ const AIQuerySection: React.FC = () => {
     useState<PredictionResponse | null>(null);
   const [connectedAccount, setConnectedAccount] =
     useState<InjectedAccountWithMeta | null>(null);
+  const [connectedEthAccount, setConnectedEthAccount] = useState<string | null>(null);
+  const [activeConnector, setActiveConnector] = useState<'polkadot' | 'ethereum'>('polkadot');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +75,14 @@ const AIQuerySection: React.FC = () => {
 
   const handleAccountChange = (account: InjectedAccountWithMeta | null) => {
     setConnectedAccount(account);
+  };
+
+  const handleEthAccountChange = (account: string | null) => {
+    setConnectedEthAccount(account);
+  };
+
+  const toggleConnector = () => {
+    setActiveConnector(activeConnector === 'polkadot' ? 'ethereum' : 'polkadot');
   };
 
   return (
@@ -223,8 +234,35 @@ const AIQuerySection: React.FC = () => {
             </p>
           </motion.div>
 
+          <motion.div variants={containerFade} className="flex justify-center gap-2 mb-2">
+            <button
+              className={`px-4 py-2 rounded-lg focus:outline-none transition-colors duration-300 ${
+                activeConnector === 'polkadot'
+                  ? 'bg-polkadot-pink-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              onClick={() => setActiveConnector('polkadot')}
+            >
+              Polkadot
+            </button>
+            <button
+              className={`px-4 py-2 rounded-lg focus:outline-none transition-colors duration-300 ${
+                activeConnector === 'ethereum'
+                  ? 'bg-polkadot-pink-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              onClick={() => setActiveConnector('ethereum')}
+            >
+              Ethereum
+            </button>
+          </motion.div>
+
           <motion.div variants={containerFade}>
-            <PolkadotConnector onAccountChange={handleAccountChange} />
+            {activeConnector === 'polkadot' ? (
+              <PolkadotConnector onAccountChange={handleAccountChange} />
+            ) : (
+              <EthereumConnector onAccountChange={handleEthAccountChange} />
+            )}
           </motion.div>
         </motion.div>
       </div>
