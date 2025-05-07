@@ -33,6 +33,14 @@ export const T = {
     // LastPriceInfo
     lastPriceButton: "Get Last Price Info",
     lastPriceTitle: "Last Submitted Price Info",
+
+    // PriceChart
+    priceChartTitle: "📈 Price History",
+    noDataAvailable: "No data available to display",
+    xAxisLabel: "Date", 
+    yAxisLabel: "Price ($/lb)",
+    historicalLabel: "Historical", 
+    predictionLabel: "Prediction",
   },
   es: {
     // App
@@ -63,6 +71,14 @@ export const T = {
     // LastPriceInfo
     lastPriceButton: "Obtener Información del Último Precio",
     lastPriceTitle: "Información del Último Precio Enviado",
+
+    // PriceChart
+    priceChartTitle: "📈 Histórico de Precios",
+    noDataAvailable: "No hay datos disponibles para mostrar",
+    xAxisLabel: "Fecha", 
+    yAxisLabel: "Precio ($/lb)",
+    historicalLabel: "Histórico", 
+    predictionLabel: "Predicción",
   },
 } as const;
 

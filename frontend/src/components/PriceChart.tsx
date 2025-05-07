@@ -13,6 +13,8 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { PriceData } from "../services/api";
+import { useLanguage } from "../contexts/LanguageContext";
+import { T } from "../i18n";
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -25,80 +27,6 @@ ChartJS.register(
   Legend,
 );
 
-// Opciones mejoradas: cuadrícula suave, ejes claros, tooltips personalizados
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "top" as const,
-      labels: {
-        // color de las etiquetas de leyenda
-        color: "#9CA3AF",
-      },
-    },
-    title: {
-      display: false,
-    },
-    tooltip: {
-      // tooltip oscuro con texto rosa Polkadot
-      backgroundColor: "rgba(31,41,55,0.9)",
-      titleColor: "#E6007A",
-      bodyColor: "#F472B6",
-      borderColor: "rgba(255,255,255,0.1)",
-      borderWidth: 1,
-      titleFont: {
-        weight: "bold" as const,
-      },
-      padding: 8,
-      cornerRadius: 4,
-    },
-  },
-  scales: {
-    x: {
-      title: {
-        display: true,
-        text: "Fecha",
-        color: "#9CA3AF",
-      },
-      ticks: {
-        color: "#9CA3AF",
-      },
-      grid: {
-        // líneas de cuadrícula horizontales suaves
-        drawOnChartArea: false,
-        drawTicks: false,
-        color: "rgba(156,163,175,0.3)",
-        borderDash: [3, 3],
-      },
-    },
-    y: {
-      title: {
-        display: true,
-        text: "Precio ($/lb)",
-        color: "#9CA3AF",
-      },
-      ticks: {
-        color: "#9CA3AF",
-      },
-      grid: {
-        // líneas de cuadrícula verticales suaves
-        color: "rgba(156,163,175,0.3)",
-        borderDash: [3, 3],
-      },
-    },
-  },
-  animation: {
-    tension: {
-      // suaviza el “rebote” de la línea al iniciar
-      duration: 1000,
-      easing: "easeOutQuart",
-      from: 0.5,
-      to: 0.1,
-    },
-  },
-};
-
 interface PriceChartProps {
   historicalPrices: PriceData[];
   predictions: PriceData[];
@@ -108,6 +36,77 @@ const PriceChart: React.FC<PriceChartProps> = ({
   historicalPrices,
   predictions,
 }) => {
+  const { lang } = useLanguage();
+  
+  // Opciones mejoradas: cuadrícula suave, ejes claros, tooltips personalizados
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top" as const,
+        labels: {
+          // color de las etiquetas de leyenda
+          color: "#9CA3AF",
+        },
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        // tooltip oscuro con texto rosa Polkadot
+        backgroundColor: "rgba(31,41,55,0.9)",
+        titleColor: "#E6007A",
+        bodyColor: "#F472B6",
+        borderColor: "rgba(255,255,255,0.1)",
+        borderWidth: 1,
+        titleFont: {
+          weight: "bold" as const,
+        },
+        padding: 8,
+        cornerRadius: 4,
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: T[lang].xAxisLabel,
+          color: "#9CA3AF",
+        },
+        ticks: {
+          color: "#9CA3AF",
+        },
+        grid: {
+          // líneas de cuadrícula horizontales suaves
+          drawOnChartArea: false,
+          drawTicks: false,
+          color: "rgba(156,163,175,0.3)",
+          borderDash: [3, 3],
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: T[lang].yAxisLabel,
+          color: "#9CA3AF",
+        },
+        ticks: {
+          color: "#9CA3AF",
+        },
+        grid: {
+          // líneas de cuadrícula verticales suaves
+          color: "rgba(156,163,175,0.3)",
+          borderDash: [3, 3],
+        },
+      },
+    },
+    animation: {
+      duration: 1000,
+      easing: "easeOutQuart" as const,
+    },
+  };
+
   // Combinar etiquetas y datos
   const labels = [
     ...historicalPrices.map((p) => p.date),
@@ -118,7 +117,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
     labels,
     datasets: [
       {
-        label: "Histórico",
+        label: T[lang].historicalLabel,
         data: [
           ...historicalPrices.map((p) => p.price),
           ...Array(predictions.length).fill(null),
@@ -132,7 +131,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
         tension: 0.4, // curva más suave
       },
       {
-        label: "Predicción",
+        label: T[lang].predictionLabel,
         data: [
           ...Array(historicalPrices.length).fill(null),
           ...predictions.map((p) => p.price),
@@ -156,7 +155,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
       ) : (
         <div className="flex items-center justify-center h-full bg-cafe-purple-100 rounded-lg">
           <p className="text-cafe-purple-600 font-medium">
-            No hay datos disponibles para mostrar
+            {T[lang].noDataAvailable}
           </p>
         </div>
       )}

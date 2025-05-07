@@ -158,13 +158,13 @@ const AIQuerySection: React.FC = () => {
 
       {/* Gráficos y tarjetas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Histórico de Precios */}
+        {/* Price History Chart */}
         <motion.div
           variants={containerFade}
           className={`lg:col-span-2 card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${cardHover}`}
         >
           <h2 className="text-xl font-semibold text-polkadot-pink-500 mb-4">
-            📈 Histórico de Precios
+            {T[lang].priceChartTitle}
           </h2>
           {isLoading ? (
             <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
