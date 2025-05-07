@@ -77,7 +77,7 @@ const LastPriceInfo: React.FC<LastPriceInfoProps> = () => {
       >
         {isLoading
           ? T[lang].submitting
-          : "Obtener Información del Último Precio"}
+          : T[lang].lastPriceButton}
       </button>
 
       {showModal && (
@@ -85,7 +85,7 @@ const LastPriceInfo: React.FC<LastPriceInfoProps> = () => {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3 text-center">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Último Precio Enviado
+                {T[lang].lastPriceTitle}
               </h3>
               <div className="px-7 py-3">
                 {error && (
@@ -103,26 +103,26 @@ const LastPriceInfo: React.FC<LastPriceInfoProps> = () => {
                 ) : lastPriceInfo ? (
                   <div className="space-y-2">
                     <p>
-                      <strong>ID:</strong> {lastPriceInfo.id}
+                      <strong>{T[lang].priceInfoId}</strong> {lastPriceInfo.id}
                     </p>
                     <p>
-                      <strong>Timestamp:</strong>{" "}
+                      <strong>{T[lang].priceInfoTimestamp}</strong>{" "}
                       {new Date(
                         Number(lastPriceInfo.timestamp) * 1000,
                       ).toLocaleString()}
                     </p>
                     <p>
-                      <strong>Precio:</strong>{" "}
+                      <strong>{T[lang].priceInfoPrice}</strong>{" "}
                       {Number(lastPriceInfo.price) / 100}
                     </p>
                     <p>
-                      <strong>Submitter:</strong>{" "}
+                      <strong>{T[lang].priceInfoSubmitter}</strong>{" "}
                       {lastPriceInfo.submitter.slice(0, 6)}...
                       {lastPriceInfo.submitter.slice(-4)}
                     </p>
                   </div>
                 ) : (
-                  <p>No hay información disponible.</p>
+                  <p>{T[lang].noInfoAvailable}</p>
                 )}
               </div>
               <div className="items-center px-4 py-3">
@@ -130,7 +130,7 @@ const LastPriceInfo: React.FC<LastPriceInfoProps> = () => {
                   onClick={toggleModal}
                   className="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
-                  Cerrar
+                  {T[lang].closeButton}
                 </button>
               </div>
             </div>

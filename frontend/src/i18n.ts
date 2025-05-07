@@ -33,6 +33,12 @@ export const T = {
     // LastPriceInfo
     lastPriceButton: "Get Last Price Info",
     lastPriceTitle: "Last Submitted Price Info",
+    closeButton: "Close",
+    noInfoAvailable: "No information available.",
+    priceInfoId: "ID:",
+    priceInfoTimestamp: "Timestamp:",
+    priceInfoPrice: "Price:",
+    priceInfoSubmitter: "Submitter:",
 
     // PriceChart
     priceChartTitle: "📈 Price History",
@@ -71,6 +77,12 @@ export const T = {
     // LastPriceInfo
     lastPriceButton: "Obtener Información del Último Precio",
     lastPriceTitle: "Información del Último Precio Enviado",
+    closeButton: "Cerrar",
+    noInfoAvailable: "No hay información disponible.",
+    priceInfoId: "ID:",
+    priceInfoTimestamp: "Fecha y hora:",
+    priceInfoPrice: "Precio:",
+    priceInfoSubmitter: "Remitente:",
 
     // PriceChart
     priceChartTitle: "📈 Histórico de Precios",
