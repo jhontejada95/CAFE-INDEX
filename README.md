@@ -1,3 +1,6 @@
+![Polkadot_scalability_01+(1)](https://github.com/user-attachments/assets/e9509602-33cc-41bf-a703-3419b6cf546a)
+
+
 # ☕ CaféIndex AI: Price Indexing and Prediction 📈
 
 ## 🚀 What is CaféIndex?
