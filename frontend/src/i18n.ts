@@ -29,6 +29,10 @@ export const T = {
     connectedLabel: "Connected",
     accountLabel: "Connected account",
     networkLabel: "Network",
+
+    // LastPriceInfo
+    lastPriceButton: "Get Last Price Info",
+    lastPriceTitle: "Last Submitted Price Info",
   },
   es: {
     // App
@@ -55,6 +59,10 @@ export const T = {
     connectedLabel: "Conectado",
     accountLabel: "Cuenta conectada",
     networkLabel: "Red actual",
+
+    // LastPriceInfo
+    lastPriceButton: "Obtener Información del Último Precio",
+    lastPriceTitle: "Información del Último Precio Enviado",
   },
 } as const;
 

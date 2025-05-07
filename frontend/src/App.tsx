@@ -4,6 +4,7 @@ import React from "react";
 import AIQuerySection from "./components/AIQuerySection";
 import { ThemeSwitcher } from "./components/ThemeSwitcher";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import LastPriceInfo from "./components/LastPriceInfo";
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,9 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-grow container mx-auto p-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <AIQuerySection />
+        <div className="mt-4">
+          <LastPriceInfo />
+        </div>
       </main>
 
       {/* Footer */}
