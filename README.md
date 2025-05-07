@@ -1,40 +1,49 @@
 # ☕ CaféIndex AI: Price Indexing and Prediction 📈
 
-CaféIndex AI is a comprehensive solution for indexing on-chain coffee prices, analyzing historical data, and providing price predictions using machine learning models. The project is built with Python and leverages SubQuery for data indexing, with a modern React frontend for visualization, and supports both Polkadot/Substrate and Ethereum (EVM) integration for on-chain price oracle functionality.
+## 🚀 What is CaféIndex?
 
-## ✨ Features
+CaféIndex is the ultimate on-chain coffee price oracle & forecasting platform! ☕🔮
 
-1. **📊 On-chain Price Indexing**
-   - Interacts with SubQuery's GraphQL API to fetch coffee price data
-   - Stores data in CSV and/or SQLite database for analysis
+- 📥 **Data Ingestion**  
+  - Streams coffee price feeds from a SubQuery indexer on Westend  
+  - Persists raw + cleaned data in CSV/SQLite for reproducible analysis  
 
-2. **🧠 Data Preprocessing & Modeling**
-   - Cleans and normalizes historical price data using pandas
-   - Creates time-series features for prediction
-   - Trains and evaluates RandomForest and Linear Regression models
-   - Selects and saves the best-performing model
+- 🤖 **Machine Learning Pipeline**  
+  - Transforms historical price series into features (lags, trends, seasonality)  
+  - Trains Random Forest & Linear Regression, picks the champion model  
+  - Exposes the model for fast, accurate inference  
 
-3. **🔮 Prediction Service**
-   - FastAPI endpoint that provides price predictions
-   - Supports custom prediction horizons
+- 🖥️ **Prediction API (FastAPI)**  
+  - `POST /predict` with your prompt & horizon  
+  - Returns:  
+    - 📊 Historical price points  
+    - 🔮 Future predictions  
+    - 📝 AI-generated explanation via DeepSeek  
 
-4. **🤖 AI-Enhanced Explanations**
-   - Optional integration with DeepSeek AI models
-   - Provides natural language explanations of price predictions
+- 🎨 **Interactive Frontend (React + Tailwind)**  
+  - Chat-style “Ask the AI Agent” interface  
+  - Beautiful markdown-formatted responses & responsive charts  
+  - 🌐 English/Spanish toggle + 🌙 light ↔ dark mode  
 
-5. **🎨 Interactive Frontend**
-   - Modern React interface with pastel purple aesthetics
-   - Responsive design for various screen sizes
-   - Real-time price visualization and AI interaction
+- 🔗 **Blockchain Oracle (Westend via MetaMask)**  
+  - Connect MetaMask to Westend testnet as a custom RPC  
+  - Submit coffee prices in WND and fetch your last tx details (hash, timestamp, price, submitter)  
+  - Display live on-chain current price & monthly prediction  
 
-6. **🏦 On-chain Price Oracle**
-   - Publishes coffee price data to Polkadot's Westend testnet or Ethereum-compatible networks
-   - Creates a public, auditable record of price history
-   - Periodic submissions via scheduled jobs (every 15 minutes)
+Together, these pieces deliver a seamless, auditable coffee-price oracle with cutting-edge AI — all wrapped in one polished app! ✨  
 
-7. **ℹ️ Last Price Information**
-    - Displays details of the most recently submitted price, including ID, timestamp, price, and submitter address.
-    - Provides a user-friendly modal for viewing this information.
+![Imagen de WhatsApp 2025-05-06 a las 20 57 43_f9184461](https://github.com/user-attachments/assets/01139fde-393c-40f7-ba4b-61655c79fb4f)
+AI Price Prediction
+
+![Imagen de WhatsApp 2025-05-06 a las 20 58 03_d829b0d9](https://github.com/user-attachments/assets/3a7e5161-c27b-4bd9-9967-bae697ccfc85)
+Night mode
+
+![Imagen de WhatsApp 2025-05-06 a las 20 58 34_3a2ce7c5](https://github.com/user-attachments/assets/3a63e45e-46da-43f0-bde8-09ce1c454456)
+Blockchain query
+
+![Imagen de WhatsApp 2025-05-06 a las 21 00 13_a8a20c21](https://github.com/user-attachments/assets/38483e52-6537-4474-b13f-f6cf41eef565)
+Python Backend
+
 
 ## 🗂️ Project Structure
 ```bash
